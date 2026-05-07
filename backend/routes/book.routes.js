@@ -5,20 +5,27 @@ const { Op } = require('sequelize');
 
 const router = express.Router();
 
-// Get all books (can search by title/author/category)
-router.get('/', authenticate, async (req, res) => {
+// Get all books (can search by title/author/category and filter by category/availability)
+router.get('/', async (req, res) => {
   try {
-    const { query } = req.query;
+    const { query, category, availability } = req.query;
     let where = {};
+    
     if (query) {
-      where = {
-        [Op.or]: [
-          { title: { [Op.like]: `%${query}%` } },
-          { author: { [Op.like]: `%${query}%` } },
-          { category: { [Op.like]: `%${query}%` } }
-        ]
-      };
+      where[Op.or] = [
+        { title: { [Op.like]: `%${query}%` } },
+        { author: { [Op.like]: `%${query}%` } }
+      ];
     }
+    
+    if (category) {
+      where.category = category;
+    }
+    
+    if (availability !== undefined && availability !== '') {
+      where.available = availability === 'true';
+    }
+
     const books = await Book.findAll({ where });
     res.json(books);
   } catch (error) {

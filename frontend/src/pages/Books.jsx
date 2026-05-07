@@ -5,16 +5,18 @@ import { Search, Plus } from 'lucide-react';
 const Books = ({ user }) => {
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+  const [availability, setAvailability] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [newBook, setNewBook] = useState({ title: '', author: '', category: '' });
 
   useEffect(() => {
     fetchBooks();
-  }, [search]);
+  }, [search, category, availability]);
 
   const fetchBooks = async () => {
     try {
-      const { data } = await api.get(`/books?query=${search}`);
+      const { data } = await api.get(`/books?query=${search}&category=${category}&availability=${availability}`);
       setBooks(data);
     } catch (err) {
       console.error(err);
@@ -68,16 +70,42 @@ const Books = ({ user }) => {
         )}
       </div>
 
-      <div style={{ position: 'relative', marginBottom: '2rem', maxWidth: '500px' }}>
-        <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-        <input 
-          type="text" 
-          placeholder="Search by title, author, or category..." 
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: '300px', maxWidth: '500px' }}>
+          <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input 
+            type="text" 
+            placeholder="Search by title or author..." 
+            className="form-control" 
+            style={{ paddingLeft: '3rem' }}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+        <select 
           className="form-control" 
-          style={{ paddingLeft: '3rem' }}
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+          style={{ width: '200px' }}
+          value={category}
+          onChange={e => setCategory(e.target.value)}
+        >
+          <option value="">All Categories</option>
+          <option value="Computer Science">Computer Science</option>
+          <option value="Science">Science</option>
+          <option value="History">History</option>
+          <option value="Fiction">Fiction</option>
+          <option value="Psychology">Psychology</option>
+          <option value="Fantasy">Fantasy</option>
+        </select>
+        <select 
+          className="form-control" 
+          style={{ width: '200px' }}
+          value={availability}
+          onChange={e => setAvailability(e.target.value)}
+        >
+          <option value="">All Availability</option>
+          <option value="true">Available</option>
+          <option value="false">Issued</option>
+        </select>
       </div>
 
       {showAdd && user?.role === 'admin' && (

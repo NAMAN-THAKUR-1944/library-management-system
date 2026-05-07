@@ -39,8 +39,17 @@ app.get('/api/stats', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-sequelize.sync({ alter: true }).then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
+if (process.env.NODE_ENV !== 'production') {
+  sequelize.sync({ alter: true }).then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}.`);
+    });
   });
-});
+} else {
+  // In production (e.g. Vercel), export the app for serverless function
+  sequelize.sync({ alter: true }).then(() => {
+    console.log('Database synced');
+  }).catch(console.error);
+}
+
+module.exports = app;
